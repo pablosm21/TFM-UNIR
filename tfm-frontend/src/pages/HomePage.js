@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Box from '../components/Box';
+import Logs from '../components/Logs';
 import './HomePage.css';
 import Menu from '../components/Menu';
 import axios from 'axios';
@@ -87,6 +88,9 @@ const HomePage = () => {
           </div>
         )}
       </div>
+
+      {/* Mostrar logs en tiempo real */}
+      <Logs />
     </div>
   );
 };

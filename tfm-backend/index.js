@@ -47,7 +47,13 @@ app.post('/process', (req, res) => {
   res.json(result);
 });
 
-// Iniciar el servidor
-app.listen(PORT, () => {
+// Crear el servidor HTTP y conectar WebSockets
+const http = require('http');
+const server = http.createServer(app);
+
+// Integrar sockets.js
+require('./sockets')(server);
+
+server.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
