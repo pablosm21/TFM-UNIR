@@ -1,0 +1,19 @@
+.logs-container {
+  margin: 1em 0;
+}
+
+.logs-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background: #222;
+  color: #0f0;
+  padding: 1em;
+  border-radius: 8px;
+  list-style: none;
+}
+
+.logs-list li {
+  font-family: monospace;
+  font-size: 1em;
+  margin-bottom: 0.2em;
+}

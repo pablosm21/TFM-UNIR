@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import './Logs.css';
 
 const SOCKET_SERVER_URL = 'http://localhost:3001'; // Cambia si tu backend está en otro host/puerto
 
-function Logs() {
+
+function Logs({ boxId }) {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
+    if (!boxId) return;
     const socket = io(SOCKET_SERVER_URL);
+    // Informar al backend del boxId que nos interesa
+    socket.emit('subscribe', boxId);
     socket.on('log', (msg) => {
-      setLogs((prev) => [...prev, msg]);
+      // Solo mostrar logs que incluyan el boxId
+      if (msg && msg.boxId === boxId) {
+        setLogs((prev) => [...prev, msg.line]);
+      }
     });
     return () => socket.disconnect();
-  }, []);
+  }, [boxId]);
+
+  if (!boxId) return null;
 
   return (
-    <div>
+    <div className="logs-container">
       <h2>Logs en tiempo real</h2>
-      <ul style={{ maxHeight: 200, overflowY: 'auto', background: '#222', color: '#0f0', padding: '1em', borderRadius: 8 }}>
+      <ul className="logs-list">
         {logs.map((log, idx) => (
           <li key={idx}>{log}</li>
         ))}
