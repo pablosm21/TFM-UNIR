@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "JAVASCRIPT",
+    "builds_directory": "/home/psmolina/TFM_PRUEBA/build_javascript",
+    "description": "Descripción de la JAVASCRIPT",
+    "actions": [
+      { "label": "c", "message": "Limpiar librerias antiguas JAVASCRIPT", "command": "rm -rf /home/psmolina/TFM_PRUEBA/build_javascript" },
+      { "label": "m", "message": "compilar JAVASCRIPT", "command": "" },
+      { "label": "p", "message": "prepare_build JAVASCRIPT", "command": "/home/psmolina/TFM_PRUEBA/project/javascript_component/make_build.sh" }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "JAVA",
+    "builds_directory": "/home/psmolina/TFM_PRUEBA/build_java",
+    "description": "Descripción de la JAVA",
+    "actions": [
+      { "label": "c", "message": "Limpiar librerias antiguas JAVA", "command": "rm -rf /home/psmolina/TFM_PRUEBA/build_java" },
+      { "label": "m", "message": "compilar JAVA", "command": "cd /home/psmolina/TFM_PRUEBA/project/java_component;javac *.java" },
+      { "label": "p", "message": "prepare_build JAVA", "command": "cd /home/psmolina/TFM_PRUEBA/project/java_component;mkdir build;cp *.class startup.sh build/;tar -cvf build_java.tar build/" }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "CPP",
+    "builds_directory": "/home/psmolina/TFM_PRUEBA/build_cpp",
+    "description": "Descripción de la CPP",
+    "actions": [
+      { "label": "c", "message": "Limpiar librerias antiguas CPP", "command": "rm -rf /home/psmolina/TFM_PRUEBA/build_cpp" },
+      { "label": "m", "message": "compilar CPP", "command": "cd /home/psmolina/TFM_PRUEBA/project/cpp_component ;mkdir build ; g++ main.cpp -o build/main.exe" },
+      { "label": "p", "message": "prepare_build CPP", "command": "cp /home/psmolina/TFM_PRUEBA/project/cpp_component/startup.sh /home/psmolina/TFM_PRUEBA/project/cpp_component/build ; tar -cvf /home/psmolina/TFM_PRUEBA/project/cpp_component/ build_cpp.tar /home/psmolina/TFM_PRUEBA/project/cpp_component/build/" }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "PYTHON",
+    "builds_directory": "/home/psmolina/TFM_PRUEBA/build_python",
+    "description": "Descripción de la PYTHON",
+    "actions": [
+      { "label": "c", "message": "Limpiar librerias antiguas PYTHON", "command": "rm -rf /home/psmolina/TFM_PRUEBA/build_python" },
+      { "label": "m", "message": "compilar PYTHON", "command": "" },
+      { "label": "p", "message": "prepare_build PYTHON", "command": "tar -cvf build_python.tar /home/psmolina/TFM_PRUEBA/project/python_component/main.py" }
+    ]
+  }
+]
