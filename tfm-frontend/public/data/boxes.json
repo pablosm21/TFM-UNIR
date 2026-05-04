@@ -42,5 +42,16 @@
       { "label": "m", "message": "compilar PYTHON", "command": "" },
       { "label": "p", "message": "prepare_build PYTHON", "command": "tar -cvf build_python.tar /home/psmolina/TFM_SIMULATION/project/python_component/main.py" }
     ]
+  },
+  {
+    "id": 5,
+    "name": "LOG_COMPONENT",
+    "builds_directory": "/home/psmolina/TFM_SIMULATION/build_log_component",
+    "description": "Descripción del LOG_COMPONENT",
+    "actions": [
+      { "label": "c", "message": "Limpiar librerias antiguas LOG_COMPONENT", "command": "rm -rf /home/psmolina/TFM_SIMULATION/build_log_component" },
+      { "label": "m", "message": "compilar LOG_COMPONENT", "command": "cd /home/psmolina/TFM-SIMULATION/project/log_component;g++ -Wall -Wextra -Wpedantic -v -save-temps -ftime-report log_main.cpp -o build/log_component.exe > salida.log 2>&1" },
+      { "label": "p", "message": "prepare_build LOG_COMPONENT", "command": "tar -cvf build_log_component.tar /home/psmolina/TFM_SIMULATION/project/log_component/main.py" }
+    ]
   }
 ]
