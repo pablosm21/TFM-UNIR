@@ -18,12 +18,20 @@
   gap: 20px; /* Añado un espacio entre las cajas y la descripción */
 }
 
+.left-column {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
 .box-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   justify-content: start;
-  width: 50%; /* Ocupa la mitad izquierda de la pantalla */
+  width: 100%;
   align-self: flex-start; /* Asegura que las cajas comiencen desde arriba */
 }
 

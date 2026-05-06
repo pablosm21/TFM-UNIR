@@ -32,45 +32,92 @@ module.exports = (server) => {
       currentBoxId = boxId;
 
       const logFilePath = logPaths[boxId];
-      if (!logFilePath) return;
+      if (!logFilePath) {
+        socket.emit('log', {
+          boxId,
+          line: `[WARN] BoxId sin ruta de log configurada: ${boxId}`
+        });
+        return;
+      }
 
 
       // Enviar el contenido actual del log al suscribirse
       if (fs.existsSync(logFilePath)) {
-        const data = fs.readFileSync(logFilePath, 'utf8');
-        if (data) {
-          data.split('\n').forEach(line => {
-            if (line.trim()) socket.emit('log', { boxId, line });
+        try {
+          const data = fs.readFileSync(logFilePath, 'utf8');
+          if (data) {
+            data.split('\n').forEach(line => {
+              if (line.trim()) socket.emit('log', { boxId, line });
+            });
+          } else {
+            socket.emit('log', { boxId, line: '[INFO] El fichero de log esta vacio.' });
+          }
+          lastSize = fs.statSync(logFilePath).size;
+        } catch (readErr) {
+          socket.emit('log', {
+            boxId,
+            line: `[WARN] Error leyendo log inicial (${logFilePath}): ${readErr.message}`
           });
+          lastSize = 0;
+          return;
         }
-        lastSize = fs.statSync(logFilePath).size;
       } else {
+        socket.emit('log', {
+          boxId,
+          line: `[WARN] No existe el fichero de log: ${logFilePath}`
+        });
         lastSize = 0;
+        return;
       }
 
-      watcher = fs.watch(logFilePath, (eventType) => {
-        if (eventType === 'change' && currentBoxId === boxId) {
-          fs.stat(logFilePath, (err, stats) => {
-            if (err) return;
-            if (stats.size > lastSize) {
-              const stream = fs.createReadStream(logFilePath, {
-                start: lastSize,
-                end: stats.size
-              });
-              let buffer = '';
-              stream.on('data', chunk => {
-                buffer += chunk.toString();
-              });
-              stream.on('end', () => {
-                buffer.split('\n').forEach(line => {
-                  if (line.trim()) socket.emit('log', { boxId, line });
+      try {
+        watcher = fs.watch(logFilePath, (eventType) => {
+          if (eventType === 'change' && currentBoxId === boxId) {
+            fs.stat(logFilePath, (err, stats) => {
+              if (err) {
+                socket.emit('log', {
+                  boxId,
+                  line: `[WARN] No se puede leer el log (${logFilePath}): ${err.message}`
                 });
-                lastSize = stats.size;
-              });
-            }
-          });
-        }
-      });
+                return;
+              }
+
+              // Si el fichero se trunca/rota, reajustar el puntero.
+              if (stats.size < lastSize) {
+                lastSize = 0;
+              }
+
+              if (stats.size > lastSize) {
+                const stream = fs.createReadStream(logFilePath, {
+                  start: lastSize,
+                  end: stats.size
+                });
+                let buffer = '';
+                stream.on('data', chunk => {
+                  buffer += chunk.toString();
+                });
+                stream.on('end', () => {
+                  buffer.split('\n').forEach(line => {
+                    if (line.trim()) socket.emit('log', { boxId, line });
+                  });
+                  lastSize = stats.size;
+                });
+                stream.on('error', (streamErr) => {
+                  socket.emit('log', {
+                    boxId,
+                    line: `[WARN] Error leyendo stream de log: ${streamErr.message}`
+                  });
+                });
+              }
+            });
+          }
+        });
+      } catch (watchErr) {
+        socket.emit('log', {
+          boxId,
+          line: `[WARN] No se puede monitorizar el log (${logFilePath}): ${watchErr.message}`
+        });
+      }
     });
 
     socket.on('disconnect', () => {

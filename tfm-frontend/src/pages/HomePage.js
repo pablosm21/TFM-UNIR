@@ -7,16 +7,38 @@ import axios from 'axios';
 
 const HomePage = () => {
   const [boxes, setBoxes] = useState([]);
+  const [boxStatuses, setBoxStatuses] = useState({});
   const [selectedBox, setSelectedBox] = useState(null);
   const [hoveredAction, setHoveredAction] = useState('');
   const [actionToConfirm, setActionToConfirm] = useState(null);
   const [concatenatedCommands, setConcatenatedCommands] = useState('');
 
+  const fetchBoxStatuses = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/box-statuses');
+      const statusMap = (response.data.statuses || []).reduce((acc, status) => {
+        acc[status.id] = status;
+        return acc;
+      }, {});
+      setBoxStatuses(statusMap);
+    } catch (error) {
+      console.error('Error loading box statuses:', error);
+    }
+  };
+
   useEffect(() => {
     fetch('/data/boxes.json')
       .then((response) => response.json())
-      .then((data) => setBoxes(data))
+      .then((data) => {
+        setBoxes(data);
+        fetchBoxStatuses();
+      })
       .catch((error) => console.error('Error loading boxes:', error));
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(fetchBoxStatuses, 3000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleBoxClick = (box) => {
@@ -33,6 +55,7 @@ const HomePage = () => {
       alert(`Error al ejecutar el comando: ${error.message}`);
     } finally {
       setConcatenatedCommands('');
+      fetchBoxStatuses();
     }
   };
 
@@ -45,10 +68,19 @@ const HomePage = () => {
       <Menu />
       <h1>Components</h1>
       <div className="content">
-        <div className="box-container">
-          {boxes.map((box) => (
-            <Box key={box.id} name={box.name} onClick={() => handleBoxClick(box)} />
-          ))}
+        <div className="left-column">
+          <div className="box-container">
+            {boxes.map((box) => (
+              <Box
+                key={box.id}
+                name={box.name}
+                onClick={() => handleBoxClick(box)}
+                backgroundColor={boxStatuses[box.id]?.color || 'yellow'}
+              />
+            ))}
+          </div>
+          {/* Mostrar logs en tiempo real del box seleccionado */}
+          <Logs boxId={selectedBox?.id} />
         </div>
         <div className="box-description">
           {selectedBox ? (
@@ -74,6 +106,12 @@ const HomePage = () => {
                 <button onClick={confirmAction} disabled={!concatenatedCommands.trim()}>
                   Confirmar Comando
                 </button>
+                <button
+                  onClick={() => setConcatenatedCommands('')}
+                  disabled={!concatenatedCommands.trim()}
+                >
+                  Borrar Comandos
+                </button>
               </div>
             </div>
           ) : (
@@ -88,9 +126,6 @@ const HomePage = () => {
           </div>
         )}
       </div>
-
-      {/* Mostrar logs en tiempo real */}
-      <Logs />
     </div>
   );
 };
