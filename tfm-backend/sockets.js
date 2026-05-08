@@ -1,4 +1,5 @@
 const socketIo = require('socket.io');
+const jwt = require('jsonwebtoken');
 
 module.exports = (server) => {
   const io = socketIo(server, { cors: { origin: '*' } });
@@ -13,8 +14,29 @@ module.exports = (server) => {
     5: '/home/psmolina/TFM-SIMULATION/project/log_component/salida.log',
   };
 
+  // Middleware de autenticación para WebSockets
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+
+    if (!token) {
+      return next(new Error('No hay token - autenticación requerida'));
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.userId = decoded.id;
+      socket.userEmail = decoded.email;
+      next();
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        return next(new Error('Token expirado'));
+      }
+      return next(new Error('Token inválido'));
+    }
+  });
+
   io.on('connection', (socket) => {
-    console.log('Cliente WebSocket conectado');
+    console.log(`Cliente WebSocket conectado: ${socket.userEmail} (userId: ${socket.userId})`);
 
     let watcher = null;
     let lastSize = 0;
@@ -122,7 +144,7 @@ module.exports = (server) => {
 
     socket.on('disconnect', () => {
       if (watcher) watcher.close();
-      console.log('Cliente WebSocket desconectado');
+      console.log(`Cliente WebSocket desconectado: ${socket.userEmail}`);
     });
   });
 };

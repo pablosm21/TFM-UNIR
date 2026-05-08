@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { io } from 'socket.io-client';
 import './Logs.css';
+import { AuthContext } from '../context/AuthContext';
 
 const SOCKET_SERVER_URL = 'http://localhost:3001'; // Cambia si tu backend está en otro host/puerto
 
 
 function Logs({ boxId }) {
+  const { token } = useContext(AuthContext);
   const [logs, setLogs] = useState([]);
   const [connectionState, setConnectionState] = useState('desconectado');
   const listRef = useRef(null);
@@ -21,7 +23,7 @@ function Logs({ boxId }) {
   };
 
   useEffect(() => {
-    if (!boxId) {
+    if (!boxId || !token) {
       setLogs([]);
       setConnectionState('desconectado');
       return;
@@ -32,7 +34,10 @@ function Logs({ boxId }) {
 
     const socket = io(SOCKET_SERVER_URL, {
       reconnection: true,
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      auth: {
+        token: token
+      }
     });
 
     const onConnect = () => {
@@ -66,7 +71,7 @@ function Logs({ boxId }) {
       socket.off('connect_error', onConnectError);
       socket.disconnect();
     };
-  }, [boxId]);
+  }, [boxId, token]);
 
   useEffect(() => {
     const node = listRef.current;

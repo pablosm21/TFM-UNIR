@@ -1,10 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const cors = require('cors');
+
+// Importar rutas de autenticación
+const authRoutes = require('./routes/auth');
+const authMiddleware = require('./middleware/auth');
 
 // Habilitar CORS para permitir solicitudes desde el frontend
 app.use(cors());
@@ -12,8 +17,20 @@ app.use(cors());
 // Middleware para parsear JSON
 app.use(express.json());
 
-// Endpoint para ejecutar un comando de bash
-app.post('/execute', (req, res) => {
+// ✓ RUTAS DE AUTENTICACIÓN
+app.use('/api/auth', authRoutes);
+
+// Endpoint protegido de prueba
+app.get('/api/protected', authMiddleware, (req, res) => {
+  res.json({ 
+    message: 'Acceso autorizado',
+    userId: req.userId,
+    userEmail: req.userEmail
+  });
+});
+
+// Endpoint para ejecutar un comando de bash (protegido)
+app.post('/api/execute', authMiddleware, (req, res) => {
   const { command } = req.body;
 
   if (!command) {
@@ -28,8 +45,8 @@ app.post('/execute', (req, res) => {
   });
 });
 
-// Endpoint para recibir parámetros y procesarlos
-app.post('/process', (req, res) => {
+// Endpoint para recibir parámetros y procesarlos (protegido)
+app.post('/api/process', authMiddleware, (req, res) => {
   const { param1, param2, param3 } = req.body;
 
   if (!param1 || !param2 || !param3) {
@@ -64,7 +81,7 @@ const getBoxColor = (salidaOutExists, validCompilationExists) => {
   return 'yellow';
 };
 
-app.get('/box-statuses', (req, res) => {
+app.get('/api/box-statuses', authMiddleware, (req, res) => {
   const statuses = Object.entries(componentDirs).map(([id, dir]) => {
     const salidaOutPath = path.join(dir, 'salida.log');
     const validCompilationPath = path.join(dir, 'valid_compilation');

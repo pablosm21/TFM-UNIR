@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Box from '../components/Box';
 import Logs from '../components/Logs';
 import './HomePage.css';
 import Menu from '../components/Menu';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const HomePage = () => {
+  const { token, logout } = useContext(AuthContext);
   const [boxes, setBoxes] = useState([]);
   const [boxStatuses, setBoxStatuses] = useState({});
   const [selectedBox, setSelectedBox] = useState(null);
@@ -13,9 +15,17 @@ const HomePage = () => {
   const [actionToConfirm, setActionToConfirm] = useState(null);
   const [concatenatedCommands, setConcatenatedCommands] = useState('');
 
+  // Configurar axios con el token
+  const getHeaders = () => ({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
+
   const fetchBoxStatuses = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/box-statuses');
+      const response = await axios.get('http://localhost:3001/api/box-statuses', {
+        headers: getHeaders()
+      });
       const statusMap = (response.data.statuses || []).reduce((acc, status) => {
         acc[status.id] = status;
         return acc;
@@ -23,6 +33,10 @@ const HomePage = () => {
       setBoxStatuses(statusMap);
     } catch (error) {
       console.error('Error loading box statuses:', error);
+      if (error.response?.status === 401) {
+        // Token expirado
+        logout();
+      }
     }
   };
 
@@ -34,12 +48,12 @@ const HomePage = () => {
         fetchBoxStatuses();
       })
       .catch((error) => console.error('Error loading boxes:', error));
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const intervalId = setInterval(fetchBoxStatuses, 3000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [token]);
 
   const handleBoxClick = (box) => {
     setSelectedBox(box);
@@ -47,12 +61,22 @@ const HomePage = () => {
 
   const confirmAction = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/execute', {
-        command: `${concatenatedCommands.trim()}`,
-      });
+      const response = await axios.post('http://localhost:3001/api/execute', 
+        {
+          command: `${concatenatedCommands.trim()}`,
+        },
+        {
+          headers: getHeaders()
+        }
+      );
       alert(`Respuesta del servidor: ${response.data.stdout}`);
     } catch (error) {
-      alert(`Error al ejecutar el comando: ${error.message}`);
+      if (error.response?.status === 401) {
+        alert('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        logout();
+      } else {
+        alert(`Error al ejecutar el comando: ${error.message}`);
+      }
     } finally {
       setConcatenatedCommands('');
       fetchBoxStatuses();
