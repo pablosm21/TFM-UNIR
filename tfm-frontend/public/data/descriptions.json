@@ -1,0 +1,26 @@
+{
+  "1": {
+    "description": "Descripción de la Caja 1",
+    "actions": [
+      { "label": "Acción 1", "message": "Acción 1 para Caja 1" },
+      { "label": "Acción 2", "message": "Acción 2 para Caja 1" },
+      { "label": "Acción 3", "message": "Acción 3 para Caja 1" }
+    ]
+  },
+  "2": {
+    "description": "Descripción de la Caja 2",
+    "actions": [
+      { "label": "Acción 1", "message": "Acción 1 para Caja 2" },
+      { "label": "Acción 2", "message": "Acción 2 para Caja 2" },
+      { "label": "Acción 3", "message": "Acción 3 para Caja 2" }
+    ]
+  },
+  "3": {
+    "description": "Descripción de la Caja 3",
+    "actions": [
+      { "label": "Acción 1", "message": "Acción 1 para Caja 3" },
+      { "label": "Acción 2", "message": "Acción 2 para Caja 3" },
+      { "label": "Acción 3", "message": "Acción 3 para Caja 3" }
+    ]
+  }
+}

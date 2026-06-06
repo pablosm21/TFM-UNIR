@@ -1,0 +1,143 @@
+.home-page {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 80px 20px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Asegura que las cajas y la descripción estén alineadas desde arriba */
+  justify-content: flex-start; /* Aseguro que todo comience desde la parte superior */
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Asegura que las cajas y la descripción estén alineadas desde arriba */
+  width: 100%;
+  gap: 20px; /* Añado un espacio entre las cajas y la descripción */
+}
+
+.left-column {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.box-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  justify-content: start;
+  width: 100%;
+  align-self: flex-start; /* Asegura que las cajas comiencen desde arriba */
+}
+
+.box-description {
+  width: 50%;
+  padding: 20px;
+  background-color: #444;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 0; /* Asegura que no se superponga con las cajas */
+  align-self: flex-start; /* Alinea la descripción desde la parte superior */
+  position: relative; /* Aseguro que no se superponga */
+}
+
+.box {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #007bff;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.box:hover {
+  transform: scale(1.05);
+}
+
+.description-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.description-buttons button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.description-buttons button:hover {
+  background-color: #0056b3;
+}
+
+.description-buttons button.selected-action {
+  background-color: #0ea5e9;
+  box-shadow: 0 0 0 2px #7dd3fc;
+}
+
+.hover-description {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.concatenated-commands {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.concatenated-commands pre {
+  margin-top: 12px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: #1f2937;
+  color: #e5e7eb;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-message {
+  margin-top: 10px;
+  color: #fecaca;
+}
+
+@media (max-width: 1000px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .left-column,
+  .box-description {
+    width: 100%;
+  }
+
+  .box-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .box-container {
+    grid-template-columns: 1fr;
+  }
+
+  .description-buttons {
+    flex-wrap: wrap;
+  }
+}
