@@ -1,0 +1,99 @@
+name: tfm-unir
+
+services:
+  simulation:
+    image: alpine:3.20
+    restart: unless-stopped
+    environment:
+      CURRENT_PROJECT: ${CURRENT_PROJECT:-/simulation/project}
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        mkdir -p /simulation
+        if [ -z "$(ls -A /simulation 2>/dev/null)" ]; then
+          echo "Initializing simulation volume from /source"
+          cp -a /source/. /simulation/
+        else
+          echo "Simulation volume already initialized"
+        fi
+        mkdir -p "$CURRENT_PROJECT"
+        touch /simulation/.ready
+        tail -f /dev/null
+    volumes:
+      - simulation_data:/simulation
+      - ${SIMULATION_HOST_PATH:-/home/psmolina/TFM-SIMULATION}:/source:ro
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /simulation/.ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tfm_unir
+      MYSQL_USER: tfm_user
+      MYSQL_PASSWORD: tfm_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./tfm-backend/init_database.sql:/docker-entrypoint-initdb.d/01-init_database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: ./tfm-backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      simulation:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: tfm_user
+      DB_PASSWORD: tfm_password
+      DB_NAME: tfm_unir
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      JWT_EXPIRE: 7d
+      CORS_ORIGINS: http://localhost:8080,http://localhost:3000
+      SOCKET_CORS_ORIGINS: http://localhost:8080,http://localhost:3000
+      COMMAND_TIMEOUT_MS: 120000
+      COMMAND_MAX_BUFFER_BYTES: 1048576
+      STATUS_POLL_INTERVAL_MS: 3000
+      SIMULATION_ROOT: /simulation
+      CURRENT_PROJECT: ${CURRENT_PROJECT:-/simulation/project}
+    ports:
+      - "3001:3001"
+    volumes:
+      - simulation_data:/simulation
+
+  frontend:
+    build:
+      context: ./tfm-frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://localhost:3001}
+        REACT_APP_SOCKET_URL: ${REACT_APP_SOCKET_URL:-http://localhost:3001}
+        REACT_APP_STATUS_POLL_INTERVAL_MS: ${REACT_APP_STATUS_POLL_INTERVAL_MS:-3000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  db_data:
+  simulation_data:

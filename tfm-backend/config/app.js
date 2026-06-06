@@ -1,3 +1,4 @@
+const path = require('path');
 require('dotenv').config();
 
 const requiredInProduction = ['JWT_SECRET'];
@@ -16,6 +17,8 @@ const toList = (value, fallback = '') => (value || fallback)
 const config = {
   env: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT) || 3001,
+  simulationRoot: process.env.SIMULATION_ROOT || '/home/psmolina/TFM-SIMULATION',
+  currentProject: process.env.CURRENT_PROJECT || path.join(process.env.SIMULATION_ROOT || '/home/psmolina/TFM-SIMULATION', 'project'),
   jwtSecret: process.env.JWT_SECRET || 'dev_insecure_secret_change_me',
   jwtExpire: process.env.JWT_EXPIRE || '7d',
   corsOrigins: toList(process.env.CORS_ORIGINS, 'http://localhost:3000'),

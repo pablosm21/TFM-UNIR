@@ -12,14 +12,16 @@ module.exports = (server) => {
   });
 
   const fs = require('fs');
+  const path = require('path');
+  const projectRoot = path.join(config.simulationRoot, 'project');
   // Mapeo de boxId a ruta de log
   const logPaths = {
-    1: '/home/psmolina/TFM-SIMULATION/project/javascript_component/salida.log',
-    2: '/home/psmolina/TFM-SIMULATION/project/java_component/salida.log',
-    3: '/home/psmolina/TFM-SIMULATION/project/cpp_component/salida.log',
-    4: '/home/psmolina/TFM-SIMULATION/project/python_component/salida.log',
-    5: '/home/psmolina/TFM-SIMULATION/project/log_component/salida.log',
-    6: '/home/psmolina/TFM-SIMULATION/project/log_component/salida.log',
+    1: path.join(projectRoot, 'javascript_component', 'salida.log'),
+    2: path.join(projectRoot, 'java_component', 'salida.log'),
+    3: path.join(projectRoot, 'cpp_component', 'salida.log'),
+    4: path.join(projectRoot, 'python_component', 'salida.log'),
+    5: path.join(projectRoot, 'log_component', 'salida.log'),
+    6: path.join(projectRoot, 'log_component', 'salida.log'),
   };
 
   // Middleware de autenticación para WebSockets

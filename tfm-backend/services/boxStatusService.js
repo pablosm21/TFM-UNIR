@@ -1,13 +1,16 @@
 const fs = require('fs');
 const path = require('path');
+const config = require('../config/app');
+
+const projectRoot = path.join(config.simulationRoot, 'project');
 
 const componentDirs = {
-  1: '/home/psmolina/TFM-SIMULATION/project/javascript_component',
-  2: '/home/psmolina/TFM-SIMULATION/project/java_component',
-  3: '/home/psmolina/TFM-SIMULATION/project/cpp_component',
-  4: '/home/psmolina/TFM-SIMULATION/project/python_component',
-  5: '/home/psmolina/TFM-SIMULATION/project/log_component',
-  6: '/home/psmolina/TFM-SIMULATION/project/log_component',
+  1: path.join(projectRoot, 'javascript_component'),
+  2: path.join(projectRoot, 'java_component'),
+  3: path.join(projectRoot, 'cpp_component'),
+  4: path.join(projectRoot, 'python_component'),
+  5: path.join(projectRoot, 'log_component'),
+  6: path.join(projectRoot, 'log_component'),
 };
 
 const getBoxColor = (salidaOutExists, validCompilationExists) => {

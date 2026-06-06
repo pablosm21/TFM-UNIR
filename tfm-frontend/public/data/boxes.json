@@ -2,69 +2,69 @@
   {
     "id": 1,
     "name": "JAVASCRIPT",
-    "builds_directory": "/home/psmolina/TFM-SIMULATION/build_javascript",
+    "builds_directory": "/${CURRENT_PROJECT}/build_javascript",
     "description": "Descripción de la JAVASCRIPT",
     "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas JAVASCRIPT", "command": "rm -rf /home/psmolina/TFM-SIMULATION/build_javascript" },
-      { "label": "m", "message": "compilar JAVASCRIPT", "command": "" },
-      { "label": "p", "message": "prepare_build JAVASCRIPT", "command": "/home/psmolina/TFM-SIMULATION/project/javascript_component/make_build.sh" }
+      { "label": "c", "message": "Limpiar librerias antiguas JAVASCRIPT"},
+      { "label": "m", "message": "compilar JAVASCRIPT"},
+      { "label": "p", "message": "prepare_build JAVASCRIPT"}
     ]
   },
   {
     "id": 2,
     "name": "JAVA",
-    "builds_directory": "/home/psmolina/TFM-SIMULATION/build_java",
+    "builds_directory": "/${CURRENT_PROJECT}/build_java",
     "description": "Descripción de la JAVA",
     "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas JAVA", "command": "rm -rf /home/psmolina/TFM-SIMULATION/build_java" },
-      { "label": "m", "message": "compilar JAVA", "command": "cd /home/psmolina/TFM-SIMULATION/project/java_component;javac *.java" },
-      { "label": "p", "message": "prepare_build JAVA", "command": "cd /home/psmolina/TFM-SIMULATION/project/java_component;mkdir build;cp *.class startup.sh build/;tar -cvf build_java.tar build/" }
+      { "label": "c", "message": "Limpiar librerias antiguas JAVA"},
+      { "label": "m", "message": "compilar JAVA"},
+      { "label": "p", "message": "prepare_build JAVA"}
     ]
   },
   {
     "id": 3,
     "name": "CPP",
-    "builds_directory": "/home/psmolina/TFM-SIMULATION/build_cpp",
+    "builds_directory": "/${CURRENT_PROJECT}/build_cpp",
     "description": "Descripción de la CPP",
     "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas CPP", "command": "rm -rf /home/psmolina/TFM-SIMULATION/build_cpp" },
-      { "label": "m", "message": "compilar CPP", "command": "cd /home/psmolina/TFM-SIMULATION/project/cpp_component ;mkdir build ; g++ main.cpp -o build/main.exe" },
-      { "label": "p", "message": "prepare_build CPP", "command": "cp /home/psmolina/TFM-SIMULATION/project/cpp_component/startup.sh /home/psmolina/TFM-SIMULATION/project/cpp_component/build ; tar -cvf /home/psmolina/TFM-SIMULATION/project/cpp_component/ build_cpp.tar /home/psmolina/TFM-SIMULATION/project/cpp_component/build/" }
+      { "label": "c", "message": "Limpiar librerias antiguas CPP"},
+      { "label": "m", "message": "compilar CPP"},
+      { "label": "p", "message": "prepare_build CPP"}
     ]
   },
   {
     "id": 4,
     "name": "PYTHON",
-    "builds_directory": "/home/psmolina/TFM-SIMULATION/build_python",
+    "builds_directory": "/${CURRENT_PROJECT}/build_python",
     "description": "Descripción de la PYTHON",
     "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas PYTHON", "command": "rm -rf /home/psmolina/TFM-SIMULATION/build_python" },
-      { "label": "m", "message": "compilar PYTHON", "command": "" },
-      { "label": "p", "message": "prepare_build PYTHON", "command": "tar -cvf build_python.tar /home/psmolina/TFM-SIMULATION/project/python_component/main.py" }
+      { "label": "c", "message": "Limpiar librerias antiguas PYTHON"},
+      { "label": "m", "message": "compilar PYTHON"},
+      { "label": "p", "message": "prepare_build PYTHON"}
     ]
   },
   {
     "id": 5,
     "name": "LOG_COMPONENT",
-    "builds_directory": "/home/psmolina/TFM-SIMULATION/build_log_component",
+    "builds_directory": "/${CURRENT_PROJECT}/build_log_component",
     "description": "Descripción del LOG_COMPONENT",
     "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas LOG_COMPONENT", "command": "rm -rf /home/psmolina/TFM-SIMULATION/build_log_component" },
-      { "label": "m", "message": "compilar LOG_COMPONENT", "command": "cd /home/psmolina/TFM-SIMULATION/project/log_component;g++ -Wall -Wextra -Wpedantic -v -save-temps -ftime-report log_main.cpp -o build/log_component.exe > salida.log 2>&1" },
-      { "label": "p", "message": "prepare_build LOG_COMPONENT", "command": "tar -cvf build_log_component.tar /home/psmolina/TFM-SIMULATION/project/log_component/main.py" },
-      { "label": "k", "message": "Comprobar contenido", "command": "if [ -f /home/psmolina/TFM-SIMULATION/project/log_component/build/log_component.exe ]; then echo 'Archivo existe';touch /home/psmolina/TFM-SIMULATION/project/log_component/valid_compilation; else echo 'Archivo no existe'; fi" }
+      { "label": "c", "message": "Limpiar librerias antiguas LOG_COMPONENT"},
+      { "label": "m", "message": "compilar LOG_COMPONENT"},
+      { "label": "p", "message": "prepare_build LOG_COMPONENT"},
+      { "label": "k", "message": "Comprobar contenido"}
           ]
   },
   {
     "id": 6,
     "name": "FDP",
-    "builds_directory": "/home/psmolina/TFM-SIMULATION/build_log_component",
-    "description": "Descripción del LOG_COMPONENT",
+    "builds_directory": "/${CURRENT_PROJECT}/build_fdp",
+    "description": "Descripción del FDP",
     "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas LOG_COMPONENT", "command": "agora.sh -P project -c" },
-      { "label": "m", "message": "compilar LOG_COMPONENT", "command": "cd /home/psmolina/TFM-SIMULATION/project/log_component;g++ -Wall -Wextra -Wpedantic -v -save-temps -ftime-report log_main.cpp -o build/log_component.exe > salida.log 2>&1" },
-      { "label": "p", "message": "prepare_build LOG_COMPONENT", "command": "tar -cvf build_log_component.tar /home/psmolina/TFM-SIMULATION/project/log_component/main.py" },
-      { "label": "k", "message": "Comprobar contenido", "command": "if [ -f /home/psmolina/TFM-SIMULATION/project/log_component/build/log_component.exe ]; then echo 'Archivo existe';touch /home/psmolina/TFM-SIMULATION/project/log_component/valid_compilation; else echo 'Archivo no existe'; fi" }
+      { "label": "c", "message": "Limpiar librerias antiguas FDP"},
+      { "label": "m", "message": "compilar FDP"},
+      { "label": "p", "message": "prepare_build FDP"},
+      { "label": "k", "message": "Comprobar contenido"}
           ]
   }
 ]

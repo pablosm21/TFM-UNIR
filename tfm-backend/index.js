@@ -37,6 +37,7 @@ const generalLimiter = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/api/box-statuses' || req.path === '/api/health',
 });
 
 app.use(helmet());
