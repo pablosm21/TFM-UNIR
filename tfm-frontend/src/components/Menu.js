@@ -12,15 +12,15 @@ const Menu = () => {
   return (
     <nav className="menu">
       <ul>
-        <li><a href="#">Opción 1</a></li>
-        <li><a href="#">Opción 2</a></li>
-        <li><a href="#">Opción 3</a></li>
+        <li><button type="button">Panel</button></li>
+        <li><button type="button">Componentes</button></li>
+        <li><button type="button">Actividad</button></li>
       </ul>
       <div className="menu-right">
         {user && (
           <>
             <span className="user-info">
-              👤 {user.nombre} ({user.email})
+              Usuario: {user.nombre} ({user.email})
             </span>
             <button onClick={handleLogout} className="logout-btn">
               Cerrar Sesión

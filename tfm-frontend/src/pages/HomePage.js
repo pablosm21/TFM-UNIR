@@ -3,8 +3,9 @@ import Box from '../components/Box';
 import Logs from '../components/Logs';
 import './HomePage.css';
 import Menu from '../components/Menu';
-import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import api from '../services/api';
+import config from '../config';
 
 const HomePage = () => {
   const { token, logout } = useContext(AuthContext);
@@ -12,20 +13,14 @@ const HomePage = () => {
   const [boxStatuses, setBoxStatuses] = useState({});
   const [selectedBox, setSelectedBox] = useState(null);
   const [hoveredAction, setHoveredAction] = useState('');
-  const [actionToConfirm, setActionToConfirm] = useState(null);
-  const [concatenatedCommands, setConcatenatedCommands] = useState('');
-
-  // Configurar axios con el token
-  const getHeaders = () => ({
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  });
+  const [selectedActions, setSelectedActions] = useState([]);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [executionOutput, setExecutionOutput] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchBoxStatuses = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/box-statuses', {
-        headers: getHeaders()
-      });
+      const response = await api.get('/api/box-statuses');
       const statusMap = (response.data.statuses || []).reduce((acc, status) => {
         acc[status.id] = status;
         return acc;
@@ -45,46 +40,72 @@ const HomePage = () => {
       .then((response) => response.json())
       .then((data) => {
         setBoxes(data);
+        if (data.length > 0) {
+          setSelectedBox(data[0]);
+        }
         fetchBoxStatuses();
       })
       .catch((error) => console.error('Error loading boxes:', error));
   }, [token]);
 
   useEffect(() => {
-    const intervalId = setInterval(fetchBoxStatuses, 3000);
+    const intervalId = setInterval(fetchBoxStatuses, config.statusPollIntervalMs);
     return () => clearInterval(intervalId);
-  }, [token]);
+  }, [token, selectedBox]);
 
   const handleBoxClick = (box) => {
     setSelectedBox(box);
+    setSelectedActions([]);
+    setExecutionOutput('');
+    setErrorMessage('');
   };
 
-  const confirmAction = async () => {
+  const executeSelectedActions = async () => {
+    if (!selectedBox || selectedActions.length === 0) {
+      return;
+    }
+
+    setIsExecuting(true);
+    setExecutionOutput('');
+    setErrorMessage('');
+
     try {
-      const response = await axios.post('http://localhost:3001/api/execute', 
-        {
-          command: `${concatenatedCommands.trim()}`,
-        },
-        {
-          headers: getHeaders()
-        }
-      );
-      alert(`Respuesta del servidor: ${response.data.stdout}`);
+      const outputs = [];
+
+      for (const actionLabel of selectedActions) {
+        const response = await api.post('/api/execute', {
+          boxId: selectedBox.id,
+          actionLabel,
+        });
+        const { stdout, stderr, skipped, reason } = response.data;
+        const header = `Accion ${actionLabel}`;
+        const details = skipped
+          ? `[SKIPPED] ${reason || 'Sin comando'}`
+          : `${stdout || ''}${stderr ? `\n[STDERR]\n${stderr}` : ''}`;
+        outputs.push(`${header}\n${details}`.trim());
+      }
+
+      setExecutionOutput(outputs.join('\n\n'));
     } catch (error) {
       if (error.response?.status === 401) {
-        alert('Sesión expirada. Por favor, vuelve a iniciar sesión.');
         logout();
       } else {
-        alert(`Error al ejecutar el comando: ${error.message}`);
+        setErrorMessage(error.response?.data?.error || error.message);
       }
     } finally {
-      setConcatenatedCommands('');
+      setSelectedActions([]);
+      setIsExecuting(false);
       fetchBoxStatuses();
     }
   };
 
   const handleActionClick = (action) => {
-    setConcatenatedCommands((prevCommands) => `${prevCommands} ${action.command}`);
+    setSelectedActions((prevActions) => {
+      if (prevActions.includes(action.label)) {
+        return prevActions.filter((item) => item !== action.label);
+      }
+      return [...prevActions, action.label];
+    });
   };
 
   return (
@@ -118,6 +139,7 @@ const HomePage = () => {
                     onClick={() => handleActionClick(action)}
                     onMouseEnter={() => setHoveredAction(action.message)}
                     onMouseLeave={() => setHoveredAction('')}
+                    className={selectedActions.includes(action.label) ? 'selected-action' : ''}
                   >
                     {action.label}
                   </button>
@@ -125,30 +147,25 @@ const HomePage = () => {
                 {hoveredAction && <p className="hover-description">{hoveredAction}</p>}
               </div>
               <div className="concatenated-commands">
-                <h2>Comandos concatenados:</h2>
-                <p>{concatenatedCommands}</p>
-                <button onClick={confirmAction} disabled={!concatenatedCommands.trim()}>
-                  Confirmar Comando
+                <h2>Acciones seleccionadas:</h2>
+                <p>{selectedActions.length ? selectedActions.join(', ') : 'Ninguna'}</p>
+                <button onClick={executeSelectedActions} disabled={!selectedActions.length || isExecuting}>
+                  {isExecuting ? 'Ejecutando...' : 'Ejecutar acciones'}
                 </button>
                 <button
-                  onClick={() => setConcatenatedCommands('')}
-                  disabled={!concatenatedCommands.trim()}
+                  onClick={() => setSelectedActions([])}
+                  disabled={!selectedActions.length || isExecuting}
                 >
-                  Borrar Comandos
+                  Borrar Seleccion
                 </button>
+                {errorMessage && <p className="error-message">{errorMessage}</p>}
+                {executionOutput && <pre>{executionOutput}</pre>}
               </div>
             </div>
           ) : (
             <p>Haz clic en una caja para ver la descripción</p>
           )}
         </div>
-        {actionToConfirm && (
-          <div className="confirmation-modal">
-            <p>¿Estás seguro de que deseas ejecutar esta acción?</p>
-            <button onClick={confirmAction}>Confirmar</button>
-            <button onClick={() => setActionToConfirm(null)}>Cancelar</button>
-          </div>
-        )}
       </div>
     </div>
   );

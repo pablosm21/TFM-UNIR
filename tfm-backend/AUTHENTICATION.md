@@ -191,16 +191,20 @@ Respuesta (200):
 }
 ```
 
-#### Ejecutar Comando (protegido)
+#### Ejecutar Acción Permitida (protegido)
 ```bash
 POST /api/execute
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "command": "ls -la"
+  "boxId": 5,
+  "actionLabel": "m"
 }
 ```
+
+> Seguridad: el backend ya no ejecuta comandos arbitrarios enviados por el cliente.
+> Solo ejecuta acciones permitidas por una allowlist interna.
 
 #### Procesar Parámetros (protegido)
 ```bash
@@ -226,6 +230,19 @@ Respuesta (200):
 }
 ```
 
+#### Healthcheck
+```bash
+GET /api/health
+
+Respuesta (200):
+{
+  "status": "ok",
+  "env": "development",
+  "uptimeSeconds": 123,
+  "timestamp": "2026-06-06T12:34:56.000Z"
+}
+```
+
 ## 🔒 Seguridad
 
 ✓ Contraseñas hasheadas con bcryptjs
@@ -233,6 +250,10 @@ Respuesta (200):
 ✓ Endpoints protegidos con middleware
 ✓ Validación de entrada en servidor
 ✓ Índices de BD para rendimiento
+✓ Rate limiting global y en autenticación
+✓ Helmet para cabeceras HTTP seguras
+✓ CORS restringido por origen configurable
+✓ Ejecución de acciones por allowlist
 
 ## 📝 Estructura de Carpetas
 
@@ -263,7 +284,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 # Login
 TOKEN=$(curl -s -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"123456"}' | jq -r '.token')
+  -d '{"email":"test@example.com","password":"12345678"}' | jq -r '.token')
 
 # Usar token en endpoint protegido
 curl -X GET http://localhost:3001/api/protected \
@@ -283,6 +304,11 @@ curl -X GET http://localhost:3001/api/protected \
 | JWT_EXPIRE | Expiración del token | 7d, 24h, etc |
 | PORT | Puerto del servidor | 3001 |
 | NODE_ENV | Ambiente | development, production |
+| CORS_ORIGINS | Lista de orígenes HTTP permitidos (CSV) | http://localhost:3000 |
+| SOCKET_CORS_ORIGINS | Lista de orígenes Socket.IO permitidos (CSV) | http://localhost:3000 |
+| COMMAND_TIMEOUT_MS | Timeout de ejecución de acción | 120000 |
+| COMMAND_MAX_BUFFER_BYTES | Buffer máximo stdout/stderr | 1048576 |
+| STATUS_POLL_INTERVAL_MS | Intervalo sugerido de polling para frontend | 3000 |
 
 ## 🐛 Troubleshooting
 

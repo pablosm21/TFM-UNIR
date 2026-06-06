@@ -1,8 +1,16 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config/app');
 
 // Middleware para verificar JWT
 const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const authorization = req.headers.authorization || '';
+  const [scheme, token] = authorization.split(' ');
+
+  if (scheme !== 'Bearer') {
+    return res.status(401).json({
+      error: 'No autorizado - Esquema Bearer requerido'
+    });
+  }
 
   if (!token) {
     return res.status(401).json({ 
@@ -11,7 +19,7 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwtSecret);
     req.userId = decoded.id;
     req.userEmail = decoded.email;
     next();

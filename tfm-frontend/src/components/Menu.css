@@ -25,14 +25,16 @@
   display: inline;
 }
 
-.menu ul li a {
+.menu ul li button {
   color: #fff;
-  text-decoration: none;
+  background: transparent;
+  border: none;
   font-size: 16px;
+  cursor: pointer;
   transition: color 0.3s;
 }
 
-.menu ul li a:hover {
+.menu ul li button:hover {
   color: #1e90ff;
 }
 

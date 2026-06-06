@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { io } from 'socket.io-client';
 import './Logs.css';
 import { AuthContext } from '../context/AuthContext';
+import config from '../config';
 
-const SOCKET_SERVER_URL = 'http://localhost:3001'; // Cambia si tu backend está en otro host/puerto
+const MAX_LOG_LINES = 1000;
+const SOCKET_SERVER_URL = config.socketUrl;
 
 
 function Logs({ boxId }) {
@@ -33,7 +35,10 @@ function Logs({ boxId }) {
     setLogs([]);
 
     const socket = io(SOCKET_SERVER_URL, {
+      autoConnect: true,
       reconnection: true,
+      reconnectionAttempts: 8,
+      reconnectionDelay: 1000,
       transports: ['websocket', 'polling'],
       auth: {
         token: token
@@ -61,7 +66,13 @@ function Logs({ boxId }) {
     socket.on('log', (msg) => {
       // Solo mostrar logs que incluyan el boxId
       if (msg && Number(msg.boxId) === Number(boxId)) {
-        setLogs((prev) => [...prev, msg.line || JSON.stringify(msg)]);
+        setLogs((prev) => {
+          const updated = [...prev, msg.line || JSON.stringify(msg)];
+          if (updated.length > MAX_LOG_LINES) {
+            return updated.slice(updated.length - MAX_LOG_LINES);
+          }
+          return updated;
+        });
       }
     });
 

@@ -84,8 +84,60 @@
   background-color: #0056b3;
 }
 
+.description-buttons button.selected-action {
+  background-color: #0ea5e9;
+  box-shadow: 0 0 0 2px #7dd3fc;
+}
+
 .hover-description {
   margin-top: 10px;
   font-size: 14px;
   color: #ccc;
+}
+
+.concatenated-commands {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.concatenated-commands pre {
+  margin-top: 12px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: #1f2937;
+  color: #e5e7eb;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-message {
+  margin-top: 10px;
+  color: #fecaca;
+}
+
+@media (max-width: 1000px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .left-column,
+  .box-description {
+    width: 100%;
+  }
+
+  .box-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .box-container {
+    grid-template-columns: 1fr;
+  }
+
+  .description-buttons {
+    flex-wrap: wrap;
+  }
 }

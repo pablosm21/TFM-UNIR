@@ -108,8 +108,8 @@ Página con dos modos:
 
 ### HomePage.js
 ✓ Ahora usa `useContext(AuthContext)` para obtener el token  
-✓ Pasa el token en las headers de peticiones axios  
-✓ Actualiza URLs a `/api/...`  
+✓ Usa un cliente API centralizado (`src/services/api.js`)  
+✓ Ejecuta acciones permitidas por `boxId` + `actionLabel`  
 ✓ Maneja errores 401 (sesión expirada)  
 
 ### Menu.js
@@ -120,6 +120,7 @@ Página con dos modos:
 ### Logs.js
 ✓ Pasa el token en la conexión WebSocket  
 ✓ Autenticación en `socket.handshake.auth`
+✓ Limita el buffer de logs para evitar crecimiento infinito en memoria
 
 ## 🔗 Cómo se Usa
 
@@ -147,26 +148,32 @@ function MiComponente() {
 
 ### 3. Hacer peticiones autenticadas
 ```jsx
-const { token } = useContext(AuthContext);
+import api from './services/api';
 
-const response = await axios.get(
-  'http://localhost:3001/api/protected',
-  {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  }
-);
+const response = await api.get('/api/protected');
 ```
+
+### 4. Variables de entorno
+Crear archivo `.env` desde `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Variables:
+- `REACT_APP_API_BASE_URL` (por defecto `http://localhost:3001`)
+- `REACT_APP_SOCKET_URL` (por defecto `http://localhost:3001`)
+- `REACT_APP_STATUS_POLL_INTERVAL_MS` (por defecto `3000`)
 
 ## 🛡️ Flujo Seguro
 
 1. **Frontend** almacena token en `localStorage`
 2. **Cada petición** incluye el token en headers
 3. **Backend** valida el token en middleware
-4. **Si es inválido**: devuelve 401
-5. **Frontend** captura 401 y hace logout automático
-6. **Usuario** vuelve a LoginPage
+4. **Comandos sensibles**: el frontend no envía shell commands crudos, solo acciones permitidas
+5. **Si es inválido**: devuelve 401
+6. **Frontend** captura 401 y hace logout automático
+7. **Usuario** vuelve a LoginPage
 
 ## 📦 Almacenamiento de Datos
 

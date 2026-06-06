@@ -163,9 +163,9 @@ async function logout() {
 }
 
 // ============================================
-// 8. EJECUTAR COMANDO (protegido)
+// 8. EJECUTAR ACCION PERMITIDA (protegido)
 // ============================================
-async function executeCommand(command) {
+async function executeAction(boxId, actionLabel) {
   try {
     const response = await authenticatedFetch(
       'http://localhost:3001/api/execute',
@@ -174,7 +174,7 @@ async function executeCommand(command) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ command })
+        body: JSON.stringify({ boxId, actionLabel })
       }
     );
 
@@ -187,7 +187,7 @@ async function executeCommand(command) {
     console.log('Salida:', data.stdout);
     return data;
   } catch (error) {
-    console.error('Error ejecutando comando:', error.message);
+    console.error('Error ejecutando accion:', error.message);
   }
 }
 
@@ -277,8 +277,8 @@ await verifyToken();
 // 4. Obtener perfil
 await getProfile();
 
-// 5. Ejecutar comando
-await executeCommand('ls -la');
+// 5. Ejecutar accion "m" de la caja 5
+await executeAction(5, 'm');
 
 // 6. Logout
 await logout();

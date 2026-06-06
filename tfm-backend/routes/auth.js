@@ -1,18 +1,32 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/auth');
+const config = require('../config/app');
 
 const router = express.Router();
+
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intenta de nuevo en unos minutos.' },
+});
+
+router.use(authLimiter);
 
 // ✓ REGISTRO DE USUARIO
 router.post('/register', async (req, res) => {
   try {
     const { email, password, nombre } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const normalizedNombre = String(nombre || '').trim();
 
     // Validar entrada
-    if (!email || !password || !nombre) {
+    if (!normalizedEmail || !password || !normalizedNombre) {
       return res.status(400).json({ 
         error: 'Email, contraseña y nombre son requeridos' 
       });
@@ -20,16 +34,16 @@ router.post('/register', async (req, res) => {
 
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({ 
         error: 'Email inválido' 
       });
     }
 
     // Validar longitud de contraseña
-    if (password.length < 6) {
+    if (password.length < 8) {
       return res.status(400).json({ 
-        error: 'La contraseña debe tener al menos 6 caracteres' 
+        error: 'La contraseña debe tener al menos 8 caracteres' 
       });
     }
 
@@ -39,7 +53,7 @@ router.post('/register', async (req, res) => {
       // Verificar si el usuario ya existe
       const [existingUser] = await connection.query(
         'SELECT id FROM usuarios WHERE email = ?',
-        [email]
+        [normalizedEmail]
       );
 
       if (existingUser.length > 0) {
@@ -54,7 +68,7 @@ router.post('/register', async (req, res) => {
       // Insertar usuario en BD
       const [result] = await connection.query(
         'INSERT INTO usuarios (email, password, nombre, created_at) VALUES (?, ?, ?, NOW())',
-        [email, hashedPassword, nombre]
+        [normalizedEmail, hashedPassword, normalizedNombre]
       );
 
       res.status(201).json({ 
@@ -76,9 +90,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
     // Validar entrada
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({ 
         error: 'Email y contraseña son requeridos' 
       });
@@ -90,7 +105,7 @@ router.post('/login', async (req, res) => {
       // Buscar usuario
       const [users] = await connection.query(
         'SELECT id, email, password, nombre FROM usuarios WHERE email = ?',
-        [email]
+        [normalizedEmail]
       );
 
       if (users.length === 0) {
@@ -113,8 +128,8 @@ router.post('/login', async (req, res) => {
       // Generar JWT
       const token = jwt.sign(
         { id: user.id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE || '7d' }
+        config.jwtSecret,
+        { expiresIn: config.jwtExpire }
       );
 
       // Registrar último login

@@ -1,8 +1,15 @@
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
+const config = require('./config/app');
 
 module.exports = (server) => {
-  const io = socketIo(server, { cors: { origin: '*' } });
+  const io = socketIo(server, {
+    cors: {
+      origin: config.socketCorsOrigins,
+      methods: ['GET', 'POST'],
+      credentials: false,
+    }
+  });
 
   const fs = require('fs');
   // Mapeo de boxId a ruta de log
@@ -12,6 +19,7 @@ module.exports = (server) => {
     3: '/home/psmolina/TFM-SIMULATION/project/cpp_component/salida.log',
     4: '/home/psmolina/TFM-SIMULATION/project/python_component/salida.log',
     5: '/home/psmolina/TFM-SIMULATION/project/log_component/salida.log',
+    6: '/home/psmolina/TFM-SIMULATION/project/log_component/salida.log',
   };
 
   // Middleware de autenticación para WebSockets
@@ -23,7 +31,7 @@ module.exports = (server) => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, config.jwtSecret);
       socket.userId = decoded.id;
       socket.userEmail = decoded.email;
       next();

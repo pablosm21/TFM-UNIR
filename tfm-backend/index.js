@@ -1,21 +1,58 @@
-require('dotenv').config();
 const express = require('express');
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const app = express();
-const PORT = process.env.PORT || 3001;
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const config = require('./config/app');
+const { buildStatuses } = require('./services/boxStatusService');
+const { executeWhitelistedAction } = require('./services/commandService');
+
+const app = express();
 
 // Importar rutas de autenticación
 const authRoutes = require('./routes/auth');
 const authMiddleware = require('./middleware/auth');
 
-// Habilitar CORS para permitir solicitudes desde el frontend
-app.use(cors());
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
 
-// Middleware para parsear JSON
-app.use(express.json());
+    if (config.corsOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  credentials: false,
+};
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(helmet());
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '64kb' }));
+app.use(morgan(config.env === 'production' ? 'combined' : 'dev'));
+app.use(generalLimiter);
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    env: config.env,
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // ✓ RUTAS DE AUTENTICACIÓN
 app.use('/api/auth', authRoutes);
@@ -31,18 +68,26 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 // Endpoint para ejecutar un comando de bash (protegido)
 app.post('/api/execute', authMiddleware, (req, res) => {
-  const { command } = req.body;
+  const { boxId, actionLabel } = req.body || {};
 
-  if (!command) {
-    return res.status(400).json({ error: 'No se proporcionó ningún comando' });
+  if (!boxId || !actionLabel) {
+    return res.status(400).json({ error: 'boxId y actionLabel son requeridos' });
   }
 
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
+  executeWhitelistedAction({ boxId, actionLabel })
+    .then((result) => {
+      res.json({
+        boxId: Number(boxId),
+        actionLabel: String(actionLabel),
+        ...result,
+      });
+    })
+    .catch((error) => {
+      if (error.message === 'Accion no permitida') {
+        return res.status(403).json({ error: error.message });
+      }
       return res.status(500).json({ error: error.message });
-    }
-    res.json({ stdout, stderr });
-  });
+    });
 });
 
 // Endpoint para recibir parámetros y procesarlos (protegido)
@@ -66,40 +111,8 @@ app.post('/api/process', authMiddleware, (req, res) => {
   res.json(result);
 });
 
-const componentDirs = {
-  1: '/home/psmolina/TFM-SIMULATION/project/javascript_component',
-  2: '/home/psmolina/TFM-SIMULATION/project/java_component',
-  3: '/home/psmolina/TFM-SIMULATION/project/cpp_component',
-  4: '/home/psmolina/TFM-SIMULATION/project/python_component',
-  5: '/home/psmolina/TFM-SIMULATION/project/log_component',
-};
-
-const getBoxColor = (salidaOutExists, validCompilationExists) => {
-  if (!salidaOutExists && !validCompilationExists) return 'white';
-  if (salidaOutExists && !validCompilationExists) return 'red';
-  if (salidaOutExists && validCompilationExists) return 'green';
-  return 'yellow';
-};
-
 app.get('/api/box-statuses', authMiddleware, (req, res) => {
-  const statuses = Object.entries(componentDirs).map(([id, dir]) => {
-    const salidaOutPath = path.join(dir, 'salida.log');
-    const validCompilationPath = path.join(dir, 'valid_compilation');
-
-    const salidaOutExists = fs.existsSync(salidaOutPath);
-    const validCompilationExists = fs.existsSync(validCompilationPath);
-
-    return {
-      id: Number(id),
-      salidaOutExists,
-      validCompilationExists,
-      color: getBoxColor(salidaOutExists, validCompilationExists),
-      salidaOutPath,
-      validCompilationPath,
-    };
-  });
-
-  res.json({ statuses });
+  res.json({ statuses: buildStatuses() });
 });
 
 // Crear el servidor HTTP y conectar WebSockets
@@ -109,6 +122,6 @@ const server = http.createServer(app);
 // Integrar sockets.js
 require('./sockets')(server);
 
-server.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+server.listen(config.port, () => {
+  console.log(`Servidor corriendo en http://localhost:${config.port}`);
 });
