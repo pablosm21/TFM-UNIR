@@ -63,7 +63,7 @@ function Logs({ boxId }) {
     socket.on('connect_error', onConnectError);
 
     // Registrar listener antes de suscribirse para evitar perder eventos iniciales.
-    socket.on('log', (msg) => {
+    const onLog = (msg) => {
       // Solo mostrar logs que incluyan el boxId
       if (msg && Number(msg.boxId) === Number(boxId)) {
         setLogs((prev) => {
@@ -74,12 +74,14 @@ function Logs({ boxId }) {
           return updated;
         });
       }
-    });
+    };
+    socket.on('log', onLog);
 
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('connect_error', onConnectError);
+      socket.off('log', onLog);
       socket.disconnect();
     };
   }, [boxId, token]);
@@ -89,7 +91,10 @@ function Logs({ boxId }) {
     if (!node) return;
 
     if (isAtBottomRef.current) {
-      node.scrollTop = node.scrollHeight;
+      // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
+      requestAnimationFrame(() => {
+        node.scrollTop = node.scrollHeight;
+      });
     }
   }, [logs]);
 

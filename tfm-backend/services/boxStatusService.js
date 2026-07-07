@@ -6,11 +6,7 @@ const projectRoot = path.join(config.simulationRoot, 'project');
 
 const componentDirs = {
   1: path.join(projectRoot, 'javascript_component'),
-  2: path.join(projectRoot, 'java_component'),
-  3: path.join(projectRoot, 'cpp_component'),
-  4: path.join(projectRoot, 'python_component'),
-  5: path.join(projectRoot, 'log_component'),
-  6: path.join(projectRoot, 'log_component'),
+  2: path.join(projectRoot, 'log_component')
 };
 
 const getBoxColor = (salidaOutExists, validCompilationExists) => {

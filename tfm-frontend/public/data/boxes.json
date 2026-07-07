@@ -12,39 +12,6 @@
   },
   {
     "id": 2,
-    "name": "JAVA",
-    "builds_directory": "/${CURRENT_PROJECT}/build_java",
-    "description": "Descripción de la JAVA",
-    "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas JAVA"},
-      { "label": "m", "message": "compilar JAVA"},
-      { "label": "p", "message": "prepare_build JAVA"}
-    ]
-  },
-  {
-    "id": 3,
-    "name": "CPP",
-    "builds_directory": "/${CURRENT_PROJECT}/build_cpp",
-    "description": "Descripción de la CPP",
-    "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas CPP"},
-      { "label": "m", "message": "compilar CPP"},
-      { "label": "p", "message": "prepare_build CPP"}
-    ]
-  },
-  {
-    "id": 4,
-    "name": "PYTHON",
-    "builds_directory": "/${CURRENT_PROJECT}/build_python",
-    "description": "Descripción de la PYTHON",
-    "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas PYTHON"},
-      { "label": "m", "message": "compilar PYTHON"},
-      { "label": "p", "message": "prepare_build PYTHON"}
-    ]
-  },
-  {
-    "id": 5,
     "name": "LOG_COMPONENT",
     "builds_directory": "/${CURRENT_PROJECT}/build_log_component",
     "description": "Descripción del LOG_COMPONENT",
@@ -52,18 +19,6 @@
       { "label": "c", "message": "Limpiar librerias antiguas LOG_COMPONENT"},
       { "label": "m", "message": "compilar LOG_COMPONENT"},
       { "label": "p", "message": "prepare_build LOG_COMPONENT"},
-      { "label": "k", "message": "Comprobar contenido"}
-          ]
-  },
-  {
-    "id": 6,
-    "name": "FDP",
-    "builds_directory": "/${CURRENT_PROJECT}/build_fdp",
-    "description": "Descripción del FDP",
-    "actions": [
-      { "label": "c", "message": "Limpiar librerias antiguas FDP"},
-      { "label": "m", "message": "compilar FDP"},
-      { "label": "p", "message": "prepare_build FDP"},
       { "label": "k", "message": "Comprobar contenido"}
           ]
   }
